@@ -1,5 +1,6 @@
 package lab9;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
@@ -16,6 +17,7 @@ public class ShoppingList {
 			ArrayList<ArrayList> cart = new ArrayList();
 			printMenu();	
 			shop(cart);
+			printCart(cart);
 			retry = retry(cartTotal(cart));
 		}
 		exit();
@@ -64,7 +66,7 @@ public class ShoppingList {
 		System.out.println("Item" + padding(padding() - 4, " ") + "Price");
 		System.out.println(padding(padding(), "=") + padding(5, "="));
 		for (String key : menu().keySet()) {
-			System.out.println(key + padding(padding() - key.length(), " ") + "$" + menu().get(key));
+			System.out.println(key + padding(padding() - key.length(), " ") + "$" + printPrice(menu().get(key)));
 		}
 	}
 	
@@ -76,9 +78,8 @@ public class ShoppingList {
 			System.out.print("\nWhat would you like to order? ");
 			order = scnr.nextLine();
 			if (menu().containsKey(order)) {
-				cart.add(cartAdd(order,menu().get(order)));
-				//cart.add(order, menu().get(order));	
-				System.out.println(order + " has been added to your cart at $" + menu().get(order));
+				cart.add(cartAdd(order,menu().get(order)));	
+				System.out.println(order + " has been added to your cart at $" + printPrice(menu().get(order)));
 			} else {
 				System.out.println("Sorry, we do not currently carry that item...");
 			}
@@ -102,13 +103,81 @@ public class ShoppingList {
 		return total;
 	}
 	
+	private static HashMap<String, Double> maxPair(ArrayList<ArrayList> cart) {
+		HashMap<String, Double> maxPair = new HashMap<>();		
+		double max = 0;
+		
+		for (ArrayList pair : cart) {
+			double price = (double) pair.get(1);
+			if (price > max) {
+				maxPair.clear();
+				maxPair.put((String) pair.get(0), (double) pair.get(1));
+				max = (double) pair.get(1);
+			} else if (price == max) {
+				maxPair.put((String) pair.get(0), (double) pair.get(1));
+			}
+		}
+		return maxPair;
+	}
+	
+	private static HashMap<String, Double> minPair(ArrayList<ArrayList> cart) {
+		HashMap<String, Double> minPair = new HashMap<>();		
+		double min = Double.MAX_VALUE;
+		
+		for (ArrayList pair : cart) {
+			double price = (double) pair.get(1);
+			if (price < min) {
+				minPair.clear();
+				minPair.put((String) pair.get(0), (double) pair.get(1));
+				min = (double) pair.get(1);
+			} else if (price == min) {
+				minPair.put((String) pair.get(0), (double) pair.get(1));
+			}
+		}
+		return minPair;
+	}
+	
+	private static void printCart(ArrayList<ArrayList> cart) {
+		System.out.println("\n" + padding((padding() / 2) - 2, "*") + "YOUR**CART" + padding((padding() / 2) - 2, "*") + "\n");
+		System.out.println("Item" + padding(padding() - 4, " ") + "Price");
+		System.out.println(padding(padding(), "=") + padding(5, "="));
+		for (ArrayList itemPair : cart) {
+			System.out.println(itemPair.get(0) + padding(padding() - itemPair.get(0).toString().length(), " ") + "$" + printPrice(itemPair.get(1)));
+		}
+		System.out.println("\nAverage cost of the " + cart.size() + " item(s) in your cart is $" + printPrice(cartTotal(cart) / cart.size()));
+		
+		double max = 0;
+		System.out.print("Highest priced item: ");
+		for (String item : maxPair(cart).keySet()) {
+			System.out.print(item + " ");
+			max = maxPair(cart).get(item);
+		}
+		System.out.print("$" + printPrice(max) + "\n");
+		
+		double min = 0;
+		System.out.print("Lowest priced item: ");
+		for (String item : minPair(cart).keySet()) {
+			System.out.print(item + " ");
+			min = minPair(cart).get(item);
+		}
+		System.out.print("$" + printPrice(min) + "\n");
+	}
+	
+	private static String printPrice(double price) {
+		return String.format("%.2f", price);
+	}
+	
+	private static String printPrice(Object price) {
+		return String.format("%.2f", price);
+	}
+	
 	private static boolean retry() {
 		System.out.print("Would you like to order anything else? (y/n) ");
 		return retry(scnr.nextLine().charAt(0));
 	}
 	
 	private static boolean retry(double cartTotal) {
-		System.out.print("\nYour cart contains $" + cartTotal + " empty cart and shop again? (y/n) ");
+		System.out.print("Your cart contains $" + printPrice(cartTotal) + " empty cart and shop again? (y/n) ");
 		return retry(scnr.nextLine().charAt(0));
 	}
 	
