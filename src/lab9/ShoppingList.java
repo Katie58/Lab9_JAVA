@@ -1,4 +1,5 @@
 package lab9;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
@@ -10,9 +11,9 @@ public class ShoppingList {
 	public static void main(String[] args) {
 		boolean retry = true;
 		
-		greeting();
 		while(retry) {
-			TreeMap<String, Double> cart = new TreeMap<>();
+			greeting();
+			ArrayList<ArrayList> cart = new ArrayList();
 			printMenu();	
 			shop(cart);
 			retry = retry(cartTotal(cart));
@@ -37,19 +38,7 @@ public class ShoppingList {
 		
 		return menu;
 	}
-			
-	private static void cart(TreeMap<String, Double> cart, String item, double price) {
-		cart.put(item, price);
-	}
-	
-	private static double cartTotal(TreeMap<String, Double> cart) {
-		double total = 0;
-		for (double price : cart.values()) {
-			total += price;
-		}
-		return total;
-	}
-	
+					
 	private static int padding() {
 		Iterator i = menu().entrySet().iterator();
 		int maxLength = 0;
@@ -74,12 +63,12 @@ public class ShoppingList {
 	private static void printMenu() {
 		System.out.println("Item" + padding(padding() - 4, " ") + "Price");
 		System.out.println(padding(padding(), "=") + padding(5, "="));
-		for (String item : menu().keySet()) {
-			System.out.println(item + padding(padding() - item.length(), " ") + "$" + menu().get(item));
+		for (String key : menu().keySet()) {
+			System.out.println(key + padding(padding() - key.length(), " ") + "$" + menu().get(key));
 		}
 	}
 	
-	private static void shop(TreeMap<String, Double> cart) {
+	private static void shop(ArrayList<ArrayList> cart) {
 		String order;
 		boolean retry = true;
 
@@ -87,10 +76,30 @@ public class ShoppingList {
 			System.out.print("\nWhat would you like to order? ");
 			order = scnr.nextLine();
 			if (menu().containsKey(order)) {
-				cart.put(order, menu().get(order));		
+				cart.add(cartAdd(order,menu().get(order)));
+				//cart.add(order, menu().get(order));	
+				System.out.println(order + " has been added to your cart at $" + menu().get(order));
+			} else {
+				System.out.println("Sorry, we do not currently carry that item...");
 			}
 			retry = retry();
 		}
+	}
+	
+	private static ArrayList cartAdd(String item, double price) {
+		ArrayList itemPair = new ArrayList();
+		itemPair.add(item);
+		itemPair.add(price);
+		return itemPair;		
+	}
+	
+	private static double cartTotal(ArrayList<ArrayList> cart) {
+		double total = 0;
+		for (ArrayList itemPair : cart) {
+			double price = (double) itemPair.get(1);
+			total += price;
+		}
+		return total;
 	}
 	
 	private static boolean retry() {
