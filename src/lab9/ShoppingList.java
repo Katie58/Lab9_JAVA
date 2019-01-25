@@ -14,8 +14,7 @@ public class ShoppingList {
 		
 		while(retry) {
 			greeting();
-			ArrayList<ArrayList> cart = new ArrayList();
-			printMenu();	
+			ArrayList<ArrayList> cart = new ArrayList();	
 			shop(cart);
 			printCart(cart);
 			retry = retry(cartTotal(cart));
@@ -62,24 +61,49 @@ public class ShoppingList {
 		return reps;
 	}
 	
-	private static void printMenu() {
+	private static String[] printMenu() {
+		String[] menu = new String[menu().size()];
+		int i = 1;	
+		
 		System.out.println("Item" + padding(padding() - 4, " ") + "Price");
 		System.out.println(padding(padding(), "=") + padding(5, "="));
+
 		for (String key : menu().keySet()) {
-			System.out.println(key + padding(padding() - key.length(), " ") + "$" + printPrice(menu().get(key)));
+			System.out.println(i + ". " + key + padding(padding() - key.length(), " ") + "$" + printPrice(menu().get(key)));
+			menu[i - 1] = key;
+			i++;
 		}
+		System.out.println();
+		return menu;
 	}
 	
-	private static void shop(ArrayList<ArrayList> cart) {
-		String order;
+	private static void shop(ArrayList<ArrayList> cart) {	
+		String[] menu = printMenu();
+		String order = " ";
+		int index;
 		boolean retry = true;
 
 		while(retry) {
-			System.out.print("\nWhat would you like to order? ");
-			order = scnr.nextLine();
+			System.out.print("What would you like to order? ");
+
+			if (scnr.hasNextInt()){
+				index = scnr.nextInt() - 1;
+				scnr.nextLine();
+				if (index >= 0 && index < menu.length) {
+					order = menu[index];
+				} else {
+					System.out.println("Sorry, that is not an option. Perhaps you should look over the menu first...");
+					continue;
+				}
+			} else if (scnr.hasNextLine()) {
+				order = scnr.nextLine();				
+			} else {
+				System.out.println("Perhaps check your numlock, or capslock...");
+				continue;
+			}
 			if (menu().containsKey(order)) {
 				cart.add(cartAdd(order,menu().get(order)));	
-				System.out.println(order + " has been added to your cart at $" + printPrice(menu().get(order)));
+				System.out.println(order + " has been added to your cart at $" + printPrice(menu().get(order)));				
 			} else {
 				System.out.println("Sorry, we do not currently carry that item...");
 			}
@@ -183,7 +207,7 @@ public class ShoppingList {
 	
 	private static boolean retry(char input) {
 		while (input != 'y' && input != 'Y' && input != 'n' && input != 'N') {
-			System.out.println("This is a simple yes or no question, try again...");
+			System.out.print("This is a simple yes or no question, try again...");
 			input = scnr.nextLine().charAt(0);
 		}
 		return (input == 'y' || input == 'Y');
